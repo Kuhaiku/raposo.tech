@@ -13,9 +13,8 @@ RUN npm install
 # Copia o restante do projeto
 COPY . .
 
-# Informa a porta
+# Informa a porta 3000 (Padrão EasyPanel)
 EXPOSE 3000
 
 # Inicia o servidor
 CMD ["npm", "start"]
-
