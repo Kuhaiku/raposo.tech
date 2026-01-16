@@ -14,7 +14,8 @@ RUN npm install
 COPY . .
 
 # Informa a porta
-EXPOSE 8080
+EXPOSE 3000
 
 # Inicia o servidor
 CMD ["npm", "start"]
+
