@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Raposo.tech | Soluções em Software</title>
+    <style>
+        :root {
+            --primary: #ff6b00; /* Laranja Raposo */
+            --dark: #121212;
+            --card-bg: #1e1e1e;
+            --text: #ffffff;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--dark);
+            color: var(--text);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        header {
+            width: 100%;
+            padding: 20px 0;
+            text-align: center;
+            border-bottom: 1px solid #333;
+            margin-bottom: 40px;
+        }
+
+        h1 { margin: 0; font-size: 2.5rem; letter-spacing: 2px; }
+        h1 span { color: var(--primary); }
+        p.subtitle { color: #aaa; margin-top: 10px; }
+
+        .container {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            justify-content: center;
+            max-width: 1200px;
+            padding: 20px;
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border: 1px solid #333;
+            border-radius: 12px;
+            width: 300px;
+            padding: 30px;
+            text-align: center;
+            transition: transform 0.3s, border-color 0.3s;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .card:hover {
+            transform: translateY(-10px);
+            border-color: var(--primary);
+            box-shadow: 0 10px 30px rgba(255, 107, 0, 0.15);
+        }
+
+        .card h3 { font-size: 1.5rem; margin-bottom: 10px; }
+        .price { font-size: 2rem; font-weight: bold; color: var(--primary); margin: 20px 0; }
+        .features { list-style: none; padding: 0; text-align: left; color: #ccc; margin-bottom: 30px; }
+        .features li { margin-bottom: 8px; padding-left: 20px; position: relative; }
+        .features li::before { content: "✓"; color: var(--primary); position: absolute; left: 0; }
+
+        button {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 15px;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+            transition: background 0.3s;
+        }
+
+        button:hover { background-color: #e65100; }
+        button:disabled { background-color: #555; cursor: wait; }
+
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Raposo<span>.tech</span></h1>
+        <p class="subtitle">Desenvolvimento de Software de Alta Performance</p>
+    </header>
+
+    <div class="container">
+        <div class="card">
+            <div>
+                <h3>Landing Page</h3>
+                <p>Ideal para capturar leads e vendas rápidas.</p>
+                <div class="price">R$ 500</div>
+                <ul class="features">
+                    <li>Design Responsivo</li>
+                    <li>Botão WhatsApp</li>
+                    <li>Hospedagem Inclusa (1 ano)</li>
+                </ul>
+            </div>
+            <button onclick="contratar('Landing Page Express', 500, this)">CONTRATAR AGORA</button>
+        </div>
+
+        <div class="card" style="border-color: var(--primary); transform: scale(1.05);">
+            <div style="position: absolute; top: -12px; left: 50%; transform: translateX(-50%); background: var(--primary); padding: 2px 10px; border-radius: 4px; font-size: 0.8rem; font-weight: bold;">MAIS VENDIDO</div>
+            <div>
+                <h3>Site Institucional</h3>
+                <p>Apresente sua empresa com profissionalismo.</p>
+                <div class="price">R$ 1.500</div>
+                <ul class="features">
+                    <li>Até 5 Páginas</li>
+                    <li>SEO Otimizado</li>
+                    <li>Painel Administrativo</li>
+                    <li>Integração com Redes Sociais</li>
+                </ul>
+            </div>
+            <button onclick="contratar('Site Institucional Completo', 1500, this)">CONTRATAR AGORA</button>
+        </div>
+
+        <div class="card">
+            <div>
+                <h3>Sistema Web (SaaS)</h3>
+                <p>Automação e gestão para o seu negócio.</p>
+                <div class="price">R$ 5.000</div>
+                <ul class="features">
+                    <li>Banco de Dados Completo</li>
+                    <li>Gestão de Usuários</li>
+                    <li>Relatórios e Dashboards</li>
+                    <li>API Restful</li>
+                </ul>
+            </div>
+            <button onclick="contratar('Desenvolvimento Sistema SaaS', 5000, this)">CONTRATAR AGORA</button>
+        </div>
+    </div>
+
+    <script>
+        async function contratar(servico, valor, btnElement) {
+            const originalText = btnElement.innerText;
+            btnElement.innerText = "GERANDO LINK...";
+            btnElement.disabled = true;
+
+            try {
+                // Envia o nome do serviço e o preço dinamicamente
+              const response = await fetch('/create-preference', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        description: servico,
+                        price: valor
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    window.location.href = data.preference_url;
+                } else {
+                    alert("Erro ao processar: " + JSON.stringify(data));
+                    resetBtn(btnElement, originalText);
+                }
+
+            } catch (error) {
+                console.error(error);
+                alert("O servidor está offline?");
+                resetBtn(btnElement, originalText);
+            }
+        }
+
+        function resetBtn(btn, text) {
+            btn.innerText = text;
+            btn.disabled = false;
+        }
+    </script>
+</body>
+</html>
