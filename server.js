@@ -10,14 +10,15 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
-const port = process.env.PORT || 8080;
+
+// AQUI: Mudamos o padrão para 3000 para alinhar com o Docker
+const port = process.env.PORT || 3000;
 
 // Verifica se o Token existe
 if (!process.env.MP_ACCESS_TOKEN) {
     console.warn("⚠️ AVISO: MP_ACCESS_TOKEN não configurado no .env ou Painel!");
 }
 
-// Configuração do Mercado Pago
 const client = new MercadoPagoConfig({ 
     accessToken: process.env.MP_ACCESS_TOKEN 
 });
@@ -25,13 +26,11 @@ const client = new MercadoPagoConfig({
 // --- MIDDLEWARES ---
 app.use(cors());
 app.use(express.json());
-// Serve os arquivos da pasta 'public' (Onde está seu index.html)
 app.use(express.static(path.join(__dirname, 'public')));
 
 // --- ROTAS ---
-
 app.get("/ping", (req, res) => {
-    res.send("pong 🏓 Raposo.tech Online");
+    res.send("pong 🏓 Raposo.tech na Porta 3000");
 });
 
 app.post("/create-preference", async (req, res) => {
@@ -42,17 +41,14 @@ app.post("/create-preference", async (req, res) => {
             return res.status(400).json({ error: "Descrição e preço são obrigatórios." });
         }
 
-        // LÓGICA DE DOMÍNIO AUTOMÁTICA
-        // Se a var APP_URL existir (EasyPanel), usa ela. Senão, usa o host da requisição.
+        // Detecta URL automaticamente (EasyPanel ou Local)
         let baseUrl = process.env.APP_URL; 
         
         if (!baseUrl) {
-            // Fallback para localhost ou IP local se não tiver variável configurada
             const protocol = req.secure ? 'https' : 'http';
             baseUrl = `${protocol}://${req.headers.host}`;
         }
         
-        // Remove barra no final se tiver, para não duplicar na montagem
         baseUrl = baseUrl.replace(/\/$/, "");
 
         const preference = new Preference(client);
@@ -89,7 +85,6 @@ app.post("/create-preference", async (req, res) => {
     }
 });
 
-// Qualquer rota desconhecida entrega o site
 app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
