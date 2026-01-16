@@ -1,4 +1,4 @@
-import 'dotenv/config'; // Carrega as variáveis do .env
+import 'dotenv/config'; 
 import express from 'express';
 import cors from 'cors';
 import { MercadoPagoConfig, Preference } from 'mercadopago';
@@ -25,33 +25,38 @@ const client = new MercadoPagoConfig({
 // --- MIDDLEWARES ---
 app.use(cors());
 app.use(express.json());
-// Serve os arquivos estáticos (HTML, CSS, JS) da pasta 'public'
+// Serve os arquivos da pasta 'public' (Onde está seu index.html)
 app.use(express.static(path.join(__dirname, 'public')));
 
 // --- ROTAS ---
 
-// Rota de Diagnóstico
 app.get("/ping", (req, res) => {
-    res.send("pong 🏓");
+    res.send("pong 🏓 Raposo.tech Online");
 });
 
-// Rota para Criar Pagamento
 app.post("/create-preference", async (req, res) => {
     try {
         const { description, price } = req.body;
 
-        // 1. Validação
         if (!description || !price) {
             return res.status(400).json({ error: "Descrição e preço são obrigatórios." });
         }
 
-        // 2. Define a URL base (Seja localhost ou raposo.tech)
-        // O EasyPanel preenche a variável APP_URL automaticamente
-        const baseUrl = process.env.APP_URL || `http://${req.headers.host}`;
+        // LÓGICA DE DOMÍNIO AUTOMÁTICA
+        // Se a var APP_URL existir (EasyPanel), usa ela. Senão, usa o host da requisição.
+        let baseUrl = process.env.APP_URL; 
+        
+        if (!baseUrl) {
+            // Fallback para localhost ou IP local se não tiver variável configurada
+            const protocol = req.secure ? 'https' : 'http';
+            baseUrl = `${protocol}://${req.headers.host}`;
+        }
+        
+        // Remove barra no final se tiver, para não duplicar na montagem
+        baseUrl = baseUrl.replace(/\/$/, "");
 
         const preference = new Preference(client);
 
-        // 3. Cria a preferência
         const result = await preference.create({
             body: {
                 items: [
@@ -62,7 +67,6 @@ app.post("/create-preference", async (req, res) => {
                         currency_id: 'BRL'
                     }
                 ],
-                // Redireciona o usuário de volta para o seu site
                 back_urls: {
                     success: `${baseUrl}/`, 
                     failure: `${baseUrl}/`,
@@ -72,7 +76,7 @@ app.post("/create-preference", async (req, res) => {
             }
         });
 
-        console.log(`✅ Pagamento criado: ${description} - ${baseUrl}`);
+        console.log(`✅ Checkout Criado: ${description} | Retorno para: ${baseUrl}`);
 
         res.status(200).json({ 
             preference_id: result.id,
@@ -85,12 +89,12 @@ app.post("/create-preference", async (req, res) => {
     }
 });
 
-// Qualquer outra rota entrega o index.html (Útil para SPAs)
+// Qualquer rota desconhecida entrega o site
 app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-// --- INICIALIZAÇÃO ---
+// --- START ---
 app.listen(port, () => {
-    console.log(`🚀 Server Raposo.tech rodando na porta ${port}`);
+    console.log(`🚀 Server rodando na porta ${port}`);
 });
