@@ -1,19 +1,19 @@
-# Usa uma imagem leve do Node
+# Usa versão leve do Node
 FROM node:20-alpine
 
-# Define a pasta de trabalho
+# Cria diretório da aplicação
 WORKDIR /app
 
-# Copia os arquivos de dependência
+# Copia arquivos de dependência
 COPY package*.json ./
 
-# Instala as dependências
-RUN npm install --production
+# Instala dependências
+RUN npm install
 
-# Copia o resto do código
+# Copia o código fonte e a pasta public
 COPY . .
 
-# Expõe a porta (Informativo)
+# Expõe a porta padrão
 EXPOSE 8080
 
 # Comando para iniciar
